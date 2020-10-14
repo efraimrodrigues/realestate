@@ -5,7 +5,7 @@ def load_data_set():
     x = []
     y = []
 
-    with open('samples/data_set.csv', newline='') as csvfile:
+    with open('data/data_set.csv', newline='') as csvfile:
         spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
         for row in spamreader:
             x.append(np.array(list(map(float, row[0:5]))))

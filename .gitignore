@@ -1,2 +1,5 @@
 .vscode/*
 __pycache__/*
+lsem.py
+madeline_logistic.py
+MLP_codigos/*

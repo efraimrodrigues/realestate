@@ -1,42 +1,21 @@
-#python3
-
-#Madeline using the LMSRule for training
-
 import numpy as np
 import matplotlib.pyplot as plt
 import random
 import math
+from sklearn.linear_model import LinearRegression
 
 import utils
-
-def lmsrule(w, x, y, epochs, learning_rate):
-    for i in range(0, epochs):
-        for j in range(0, len(x)):
-            y_pred = w @ x[j]
-
-            err = y[j] - y_pred
-
-            x_norm = x[j]/(x[j] @ x[j])
-
-            delta = err[:,None] @ x_norm[:,None].T
-
-            w = w + learning_rate*delta
-
-    return w
 
 x, y = utils.load_data_set()
 
 n_training_samples = int(np.floor(0.8 * len(x)))
 n_tests = int(np.floor(0.2 * len(x))) 
 
-n_rounds = 10
-epochs = 200
-learning_rate = 0.001285
+linear_regression = LinearRegression()
 
-success_rate_sum = 0
 
-highest_success_rate = 0
-lowest_success_rate = 1
+
+n_rounds = 20
 
 figure = False
 r_2 = []
@@ -48,10 +27,8 @@ for r in range(0, n_rounds):
 
     x_training = x[training_range]
     y_training = y[training_range]
-    #
-    w_init = 0.1 * np.random.rand(len(y_training[0]), len(x_training[0]))
 
-    w = lmsrule(w_init, x_training, y_training, epochs, learning_rate)
+    linear_regression.fit(x_training, y_training)
 
     success_sum = 0
 
@@ -68,12 +45,12 @@ for r in range(0, n_rounds):
 
     y_predicted = []
 
+    pred = linear_regression.predict(x_test)
+
     for test in range(0, len(x_test)):
-        pred = w @ np.matrix.flatten(x_test[test])
+        y_predicted.append(pred[test])
 
-        y_predicted.append(pred)
-
-        error = y_test[test] - pred
+        error = y_test[test] - pred[test]
 
         quadratic_error = quadratic_error + (error**2)
 

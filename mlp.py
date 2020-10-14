@@ -10,6 +10,7 @@ class mlp:
         self.x_training = x_training
         self.y_training = y_training
         self.results = []
+        self.mean_square_error = []
 
     def config(self, epochs, eta, mom, classification, n_o_neurons, n_h_layers, n_h_neurons, h_eta):
         self.epochs = epochs
@@ -30,7 +31,7 @@ class mlp:
                 w = 0.01 * np.random.rand(n_h_neurons[i], len(self.hidden_layers[i-1]))
             self.hidden_layers.append(w)
 
-        self.output_layer = 0.01 * np.random.rand(n_o_neurons, n_h_neurons[n_h_layers - 1] + 1)
+        self.output_layer = 0.1 * np.random.rand(n_o_neurons, n_h_neurons[n_h_layers - 1] + 1)
 
     def __sigmoide(self, x):
         return 1.0/(1.0 + np.exp(-x))
@@ -146,6 +147,8 @@ class mlp:
                                             )
                     old_hidden_layers[k] = aux_hidden_layer
 
+            self.mean_square_error.append(quadratic_error/self.epochs)
+
     def test(self, x_test, y_test):
         success_sum = 0
         for i in range(0, len(x_test)):
@@ -187,14 +190,21 @@ class mlp:
 
         self.results.append(100 * success_sum/len(x_test))
 
-    def test_regression(self, x_test, y_test):
+    def test_regression(self, x_test, y_test, figure):
         success_sum = 0
         y_predicted = []
+
+        mean = np.mean(y_test)
+
+        quadratic_error = 0
+        quadratic_error_sum = 0
+        dev_quadratic_error_sum = 0
+
         for i in range(0, len(x_test)):
             #Hidden layer neuron's activation
             u = []
             y = []
-
+            
             #Calculates hidden layers
             for k in range(0, self.n_h_layers):
                 if k == 0:
@@ -217,27 +227,38 @@ class mlp:
 
             for k in range(0, len(output)):
                 output[k] = self.__activation(output[k])
+
+            error = y_test[i] - output
+            quadratic_error = quadratic_error + 0.5*(error**2)
+
+            quadratic_error_sum = quadratic_error_sum + error**2
+            dev_quadratic_error_sum = dev_quadratic_error_sum + (y_test[i] - mean)**2
             
             y_predicted.append(output)
 
-        fig = plt.figure()
-        ax = fig.gca()
-        ax.set_xticks(np.arange(0, len(y_test), 1))
-        #ax.set_yticks(np.arange(-1, 1., 0.1))
-        #plt.scatter(x, y)
-        plt.grid()
-        plt.plot([i for i in range(len(y_test))], y_test, 'r+')
-        plt.plot([i for i in range(len(y_test))], y_predicted, 'bo')
-        plt.show()
+        r_2 = 1 - quadratic_error_sum/dev_quadratic_error_sum
+
+        self.results.append(r_2)
+
+        if figure:
+            fig = plt.figure()
+            ax = fig.gca()
+            ax.set_xticks(np.arange(0, len(y_test), 1))
+            #ax.set_yticks(np.arange(-1, 1., 0.1))
+            #plt.scatter(x, y)
+            plt.grid()
+            plt.plot([i for i in range(len(y_test))], y_test, 'r+')
+            plt.plot([i for i in range(len(y_test))], y_predicted, 'bo')
+            plt.show()
 
 
     def __str__(self):
         return "Mom: " + str(self.mom) + "; Epochs: " + str(self.epochs) + "; Layers: " + str(self.n_h_neurons + [self.n_o_neurons]) + "; Eta: " + str(self.h_eta + [self.eta]) + ""
 
 
-n_rounds = 10
-epochs = 10
-learning_rate = 0.051181
+n_rounds = 20
+epochs = 30
+learning_rate = 0.257181
 mom = 0.75
 
 sucess_rate_sum = 0
@@ -256,7 +277,28 @@ y_training = y[0:n_training_samples]
 tests = [x[-n_tests:], y[-n_tests:]]
 
 net = mlp(x_training, y_training)
+for i in range(n_rounds):
+    net.config(epochs, learning_rate, mom, False, len(y_training[0]), 1, [10], [0.15214523])
+    net.train(n_training_samples)
+    net.test_regression([tests[0][i] for i in range(0, n_tests)], [tests[1][i] for i in range(0, n_tests)], False)
+    if i == n_rounds - 1:
+        print(net)
+        print(np.mean(net.results))
 
-net.config(epochs, learning_rate, mom, False, len(y_training[0]), 1, [50], [0.04214523])
-net.train(n_training_samples)
-net.test_regression([tests[0][i] for i in range(0, n_tests)], [tests[1][i] for i in range(0, n_tests)])
+net = mlp(x_training, y_training)
+for i in range(n_rounds):
+    net.config(epochs, learning_rate, mom, False, len(y_training[0]), 1, [15], [0.20214523])
+    net.train(n_training_samples)
+    net.test_regression([tests[0][i] for i in range(0, n_tests)], [tests[1][i] for i in range(0, n_tests)], False)
+    if i == n_rounds - 1:
+        print(net)
+        print(np.mean(net.results))
+
+net = mlp(x_training, y_training)
+for i in range(n_rounds):
+    net.config(epochs, learning_rate, mom, False, len(y_training[0]), 2, [10, 10], [0.15214523, 0.2])
+    net.train(n_training_samples)
+    net.test_regression([tests[0][i] for i in range(0, n_tests)], [tests[1][i] for i in range(0, n_tests)], False)
+    if i == n_rounds - 1:
+        print(net)
+        print(np.mean(net.results))
