@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import random
 import math
 from sklearn.linear_model import LinearRegression
+from math import sqrt
 
 import utils
 
@@ -15,10 +16,11 @@ linear_regression = LinearRegression()
 
 
 
-n_rounds = 20
+n_rounds = 100
 
 figure = False
 r_2 = []
+rmse = []
 
 for r in range(0, n_rounds):
     max_i = random.randint(0, len(x) - n_training_samples)
@@ -59,6 +61,11 @@ for r in range(0, n_rounds):
 
     r_2.append(1 - quadratic_error_sum/dev_quadratic_error_sum)
 
+    print("%.2f" % (1 - quadratic_error_sum/dev_quadratic_error_sum))
+    
+    rmse.append(dev_quadratic_error_sum)
+
+
     if figure:
         fig = plt.figure()
         ax = fig.gca()
@@ -70,4 +77,6 @@ for r in range(0, n_rounds):
         plt.plot([i for i in range(len(y_test))], y_predicted, 'bo')
         plt.show()
 
+
 print(np.mean(r_2))
+print(sqrt(np.sum(rmse)))

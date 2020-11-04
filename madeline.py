@@ -14,6 +14,8 @@ def lmsrule(w, x, y, epochs, learning_rate):
         for j in range(0, len(x)):
             y_pred = w @ x[j]
 
+            #y_pred = (1.0)/(1.0 + math.exp(-y_pred))
+
             err = y[j] - y_pred
 
             x_norm = x[j]/(x[j] @ x[j])
@@ -29,9 +31,9 @@ x, y = utils.load_data_set()
 n_training_samples = int(np.floor(0.8 * len(x)))
 n_tests = int(np.floor(0.2 * len(x))) 
 
-n_rounds = 10
-epochs = 200
-learning_rate = 0.001285
+n_rounds = 50
+epochs = 50
+learning_rate = 0.0005
 
 success_rate_sum = 0
 
